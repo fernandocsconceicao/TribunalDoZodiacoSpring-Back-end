@@ -27,6 +27,10 @@ public class UserService {
 
         return true;
     }
+    public User getUser(String username) throws StandardException {
+
+            return userRepository.findAllByUsername(username);
+    }
 
     private Boolean validateUserDto(UserSignUpDto dto) {
         String username = dto.getUsername().toLowerCase();

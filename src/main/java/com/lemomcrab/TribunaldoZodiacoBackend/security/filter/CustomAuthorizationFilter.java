@@ -29,9 +29,10 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
     private String secret;
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        log.info("trying to authorize");
+
         if (request.getServletPath().contains("/api/login") || request.getServletPath().equals("/token/refresh/**") ) {
             filterChain.doFilter(request, response);
+            log.info("Endpoint livre de autorização");
         } else {
             String authorizationHeader = request.getHeader("Authorization");
             if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {

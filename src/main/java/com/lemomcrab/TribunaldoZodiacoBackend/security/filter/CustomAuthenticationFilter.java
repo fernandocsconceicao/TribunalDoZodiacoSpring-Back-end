@@ -30,6 +30,8 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
     private RoleRepository roleRepository;
 
     private AuthenticationManager authenticationManager;
+
+    private String username;
     @Autowired
     public CustomAuthenticationFilter(AuthenticationManager authenticationManager){
         this.authenticationManager = authenticationManager;
@@ -42,14 +44,14 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
             if(username == null || password==null){
                 log.info("Username e password inexistentes");
             }
-            log.info("User is trying to log in. Username {}",username);
+        log.info("Attempt Authentication. Username {}",username);
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, password);
         return authenticationManager.authenticate(authenticationToken);
     }
 
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException {
-        log.info("successful Authentication");
+        log.info("successful Authentication Username{}",username);
 
         User user = (User) authResult.getPrincipal();
         Algorithm algorithm = Algorithm.HMAC256("secret".getBytes());
@@ -58,7 +60,8 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
                 .withSubject(user.getUsername())
                 .withExpiresAt(new Date(System.currentTimeMillis() * 1000 * 60 * 10))
                 .withIssuer(request.getRequestURL().toString())
-                .withClaim("roles",user.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
+                .withClaim("roles",user.getAuthorities().stream().map(GrantedAuthority::getAuthority)
+                        .collect(Collectors.toList()))
                 .sign(algorithm);
         String refreshToken = JWT.create()
                 .withSubject(user.getUsername())
